@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Выбор даты</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="page">
+      <section class="date-picker-section" aria-label="Выбор даты">
+        <h1 class="page-title">Дата</h1>
+
+        <div id="datepicker" class="date-picker">
+          <label id="datepicker-label" for="date-input" class="sr-only">Дата</label>
+
+          <!-- Popup is positioned relative to this shell so it sits directly under the input row -->
+          <div class="date-picker-shell">
+            <div class="input-wrap" data-datepicker-input-wrap>
+              <input
+                type="text"
+                id="date-input"
+                class="date-input"
+                inputmode="text"
+                placeholder="ДД.ММ.ГГГГ"
+                autocomplete="off"
+                aria-labelledby="datepicker-label"
+                aria-describedby="date-error"
+                aria-invalid="false"
+                aria-expanded="false"
+                aria-haspopup="dialog"
+                aria-controls="date-calendar-popup"
+              />
+
+              <!-- One slot: calendar picker OR clear — toggled via [hidden], same footprint -->
+              <div class="input-end-slot">
+                <button
+                  type="button"
+                  id="calendar-toggle"
+                  class="input-action-btn calendar-trigger"
+                  aria-label="Открыть календарь"
+                  aria-expanded="false"
+                  aria-controls="date-calendar-popup"
+                >
+                  <svg
+                    class="calendar-icon"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M19 4H18V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM7 11h5v5H7v-5z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                </button>
+
+                <button
+                  type="button"
+                  id="clear-input"
+                  class="input-action-btn clear-trigger"
+                  hidden
+                  aria-label="Очистить дату"
+                >
+                  <span class="clear-icon" aria-hidden="true">&times;</span>
+                </button>
+              </div>
+            </div>
+
+            <div
+              id="date-calendar-popup"
+              class="calendar-popup"
+              hidden
+              role="dialog"
+              aria-modal="false"
+              aria-label="Календарь"
+            >
+              <header class="calendar-header">
+                <button
+                  type="button"
+                  id="calendar-prev-month"
+                  class="nav-btn"
+                  aria-label="Предыдущий месяц"
+                >
+                  ‹
+                </button>
+                <div class="calendar-title-cluster" aria-live="polite">
+                  <button
+                    type="button"
+                    class="calendar-title-button"
+                    id="calendar-month-button"
+                    aria-expanded="false"
+                  >
+                    <span class="calendar-title-button__text">Апрель</span>
+                    <span class="calendar-title-button__chevron calendar-title-button__chevron--down" aria-hidden="true">
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true">
+                        <g transform="rotate(180 8 8)">
+                          <path
+                            fill-rule="evenodd"
+                            clip-rule="evenodd"
+                            d="M7.64896 5.01507C7.84423 4.81984 8.16079 4.81985 8.35604 5.0151L12.642 9.3011C12.8373 9.49636 12.8373 9.81294 12.642 10.0082C12.4468 10.2035 12.1302 10.2035 11.9349 10.0082L8.00246 6.07573L4.06935 10.0082C3.87407 10.2035 3.55749 10.2035 3.36224 10.0082C3.16699 9.8129 3.16702 9.49632 3.36229 9.30107L7.64896 5.01507Z"
+                            fill="currentColor"
+                          />
+                        </g>
+                      </svg>
+                    </span>
+                    <span class="calendar-title-button__chevron calendar-title-button__chevron--up" aria-hidden="true">
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true">
+                        <path
+                          fill-rule="evenodd"
+                          clip-rule="evenodd"
+                          d="M7.64896 5.01507C7.84423 4.81984 8.16079 4.81985 8.35604 5.0151L12.642 9.3011C12.8373 9.49636 12.8373 9.81294 12.642 10.0082C12.4468 10.2035 12.1302 10.2035 11.9349 10.0082L8.00246 6.07573L4.06935 10.0082C3.87407 10.2035 3.55749 10.2035 3.36224 10.0082C3.16699 9.8129 3.16702 9.49632 3.36229 9.30107L7.64896 5.01507Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    class="calendar-title-button"
+                    id="calendar-year-button"
+                    aria-expanded="false"
+                  >
+                    <span class="calendar-title-button__text">2026</span>
+                    <span class="calendar-title-button__chevron calendar-title-button__chevron--down" aria-hidden="true">
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true">
+                        <g transform="rotate(180 8 8)">
+                          <path
+                            fill-rule="evenodd"
+                            clip-rule="evenodd"
+                            d="M7.64896 5.01507C7.84423 4.81984 8.16079 4.81985 8.35604 5.0151L12.642 9.3011C12.8373 9.49636 12.8373 9.81294 12.642 10.0082C12.4468 10.2035 12.1302 10.2035 11.9349 10.0082L8.00246 6.07573L4.06935 10.0082C3.87407 10.2035 3.55749 10.2035 3.36224 10.0082C3.16699 9.8129 3.16702 9.49632 3.36229 9.30107L7.64896 5.01507Z"
+                            fill="currentColor"
+                          />
+                        </g>
+                      </svg>
+                    </span>
+                    <span class="calendar-title-button__chevron calendar-title-button__chevron--up" aria-hidden="true">
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true">
+                        <path
+                          fill-rule="evenodd"
+                          clip-rule="evenodd"
+                          d="M7.64896 5.01507C7.84423 4.81984 8.16079 4.81985 8.35604 5.0151L12.642 9.3011C12.8373 9.49636 12.8373 9.81294 12.642 10.0082C12.4468 10.2035 12.1302 10.2035 11.9349 10.0082L8.00246 6.07573L4.06935 10.0082C3.87407 10.2035 3.55749 10.2035 3.36224 10.0082C3.16699 9.8129 3.16702 9.49632 3.36229 9.30107L7.64896 5.01507Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                    </span>
+                  </button>
+                </div>
+                <button type="button" id="calendar-next-month" class="nav-btn" aria-label="Следующий месяц">
+                  ›
+                </button>
+              </header>
+
+              <div class="calendar-weekdays" id="calendar-weekdays" aria-hidden="true">
+                <span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span class="weekday--weekend">Сб</span><span class="weekday--weekend">Вс</span>
+              </div>
+
+              <!-- 6 rows × 7 days = 42 cells, filled by JS -->
+              <div class="calendar-grid" id="calendar-grid" role="grid" aria-labelledby="datepicker-label"></div>
+            </div>
+          </div>
+
+          <p id="date-error" class="error-text" role="alert" hidden>Дата введена неверно</p>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
