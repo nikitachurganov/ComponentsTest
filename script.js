@@ -1021,6 +1021,10 @@
     setOpen(true);
   });
 
+  el.input.addEventListener("click", function () {
+    if (!isOpen()) setOpen(true);
+  });
+
   el.input.addEventListener("input", function () {
     syncFromDateInput();
   });

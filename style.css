@@ -369,6 +369,47 @@ input {
   display: none !important;
 }
 
+
+@media (max-width: 768px) {
+  .page {
+    align-items: flex-start;
+    padding: var(--space-4);
+  }
+
+  .date-picker-section,
+  .date-picker {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .calendar-popup {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    max-height: min(80vh, 640px);
+    border-radius: 16px 16px 0 0;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    box-shadow: 0 -8px 30px rgba(22, 30, 46, 0.2);
+    transform-origin: bottom center;
+    transform: translateY(100%);
+  }
+
+  .calendar-popup.calendar-popup--open {
+    transform: translateY(0);
+  }
+
+  .calendar-popup.calendar-popup--closing {
+    transform: translateY(100%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .calendar-popup,
   .calendar-popup.calendar-popup--open,
