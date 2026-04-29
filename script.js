@@ -559,10 +559,6 @@
         calendarViewMode = "days";
         updateCalendarWithHeightAnimation(function () {
           renderCalendar();
-      syncSheetInputFromMain();
-      if (isMobileSheetMode() && el.sheetInput) {
-        window.requestAnimationFrame(function () { el.sheetInput.focus(); });
-      }
         });
       }
       syncSheetInputFromMain();
@@ -1131,9 +1127,6 @@
       }
     });
   }
-
-    if (!isOpen()) setOpen(true);
-  });
 
   el.input.addEventListener("input", function () {
     syncFromDateInput();
