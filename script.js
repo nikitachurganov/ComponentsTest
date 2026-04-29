@@ -565,6 +565,7 @@
       }
         });
       }
+      syncSheetInputFromMain();
       return;
     }
 
@@ -578,6 +579,7 @@
           renderCalendar();
         });
       }
+      syncSheetInputFromMain();
       return;
     }
 
@@ -597,6 +599,7 @@
       });
     }
     syncEndIcons();
+    syncSheetInputFromMain();
   }
 
   /** Show calendar glyph when empty, × clear button when anything is typed */
