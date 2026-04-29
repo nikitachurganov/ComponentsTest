@@ -40,6 +40,7 @@
     toggle: document.getElementById("calendar-toggle"),
     clear: document.getElementById("clear-input"),
     popup: document.getElementById("date-calendar-popup"),
+    overlay: document.getElementById("calendar-sheet-overlay"),
     grid: document.getElementById("calendar-grid"),
     monthButton: document.getElementById("calendar-month-button"),
     yearButton: document.getElementById("calendar-year-button"),
@@ -230,6 +231,7 @@
     el.popup.setAttribute("hidden", "");
     el.input.setAttribute("aria-expanded", "false");
     el.popup.setAttribute("aria-hidden", "true");
+    setOverlayOpen(false);
     if (!el.toggle.hidden) {
       el.toggle.setAttribute("aria-expanded", "false");
       setToggleLabel(false);
@@ -613,6 +615,23 @@
     el.error.hidden = false;
   }
 
+  function isMobileSheetMode() {
+    return window.matchMedia("(max-width: 768px)").matches;
+  }
+
+  function setOverlayOpen(open) {
+    if (!el.overlay) return;
+    if (open) {
+      el.overlay.removeAttribute("hidden");
+      window.requestAnimationFrame(function () {
+        el.overlay.classList.add("calendar-sheet-overlay--open");
+      });
+      return;
+    }
+    el.overlay.classList.remove("calendar-sheet-overlay--open");
+    el.overlay.setAttribute("hidden", "");
+  }
+
   function setToggleLabel(open) {
     el.toggle.setAttribute("aria-label", open ? "Закрыть календарь" : "Открыть календарь");
   }
@@ -635,6 +654,7 @@
       }
 
       el.popup.removeAttribute("hidden");
+      if (isMobileSheetMode()) setOverlayOpen(true);
       el.input.setAttribute("aria-expanded", "true");
       el.popup.setAttribute("aria-hidden", "false");
       if (!el.toggle.hidden) {
@@ -1007,9 +1027,53 @@
     renderYearsView();
   }
 
+  let swipeStartY = 0;
+  let swipeCurrentY = 0;
+  let swipeTracking = false;
+
+  el.popup.addEventListener("touchstart", function (e) {
+    if (!isMobileSheetMode() || !isOpen()) return;
+    const t = e.touches && e.touches[0];
+    if (!t) return;
+    swipeTracking = true;
+    swipeStartY = t.clientY;
+    swipeCurrentY = 0;
+  }, { passive: true });
+
+  el.popup.addEventListener("touchmove", function (e) {
+    if (!swipeTracking || !isMobileSheetMode()) return;
+    const t = e.touches && e.touches[0];
+    if (!t) return;
+    const dy = Math.max(0, t.clientY - swipeStartY);
+    swipeCurrentY = dy;
+    if (dy > 0) {
+      el.popup.style.transform = "translateY(" + dy + "px)";
+      if (el.overlay) {
+        el.overlay.style.opacity = String(Math.max(0, 1 - dy / 320));
+      }
+    }
+  }, { passive: true });
+
+  el.popup.addEventListener("touchend", function () {
+    if (!swipeTracking) return;
+    swipeTracking = false;
+    const shouldClose = swipeCurrentY > 96;
+    el.popup.style.transform = "";
+    if (el.overlay) el.overlay.style.opacity = "";
+    if (shouldClose) {
+      setOpen(false);
+    }
+  });
+
   el.popup.addEventListener("mousedown", function (e) {
     e.preventDefault();
   });
+
+  if (el.overlay) {
+    el.overlay.addEventListener("click", function () {
+      setOpen(false);
+    });
+  }
 
   document.addEventListener("pointerdown", function (e) {
     if (!el.root.contains(e.target)) {
