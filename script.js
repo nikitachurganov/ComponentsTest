@@ -41,6 +41,7 @@
     clear: document.getElementById("clear-input"),
     popup: document.getElementById("date-calendar-popup"),
     overlay: document.getElementById("calendar-sheet-overlay"),
+    sheetInput: document.getElementById("calendar-sheet-input"),
     grid: document.getElementById("calendar-grid"),
     monthButton: document.getElementById("calendar-month-button"),
     yearButton: document.getElementById("calendar-year-button"),
@@ -558,6 +559,10 @@
         calendarViewMode = "days";
         updateCalendarWithHeightAnimation(function () {
           renderCalendar();
+      syncSheetInputFromMain();
+      if (isMobileSheetMode() && el.sheetInput) {
+        window.requestAnimationFrame(function () { el.sheetInput.focus(); });
+      }
         });
       }
       return;
@@ -613,6 +618,11 @@
     el.root.dataset.state = "error";
     el.input.setAttribute("aria-invalid", "true");
     el.error.hidden = false;
+  }
+
+  function syncSheetInputFromMain() {
+    if (!el.sheetInput) return;
+    el.sheetInput.value = el.input.value;
   }
 
   function isMobileSheetMode() {
@@ -1086,6 +1096,39 @@
   });
 
   el.input.addEventListener("click", function () {
+    if (isMobileSheetMode()) {
+      el.input.blur();
+    }
+    if (!isOpen()) setOpen(true);
+  });
+
+  if (el.sheetInput) {
+    el.sheetInput.addEventListener("beforeinput", function (e) {
+      const ie = /** @type {InputEvent} */ (e);
+      if (ie.inputType && String(ie.inputType).indexOf("delete") === 0) return;
+      const data = ie.data;
+      if (data && /[^0-9.]/.test(data)) e.preventDefault();
+    });
+
+    el.sheetInput.addEventListener("input", function () {
+      el.input.value = el.sheetInput.value;
+      syncFromDateInput();
+      syncSheetInputFromMain();
+    });
+
+    el.sheetInput.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        validateAndNormalize();
+        syncSheetInputFromMain();
+      }
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setOpen(false);
+      }
+    });
+  }
+
     if (!isOpen()) setOpen(true);
   });
 

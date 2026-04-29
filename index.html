@@ -79,7 +79,11 @@
               role="dialog"
               aria-modal="false"
               aria-label="Календарь"
-            >
+>
+              <div class="calendar-sheet-grabber" aria-hidden="true"></div>
+              <div class="calendar-sheet-input-wrap">
+                <input type="text" id="calendar-sheet-input" class="calendar-sheet-input" inputmode="text" placeholder="ДД.ММ.ГГГГ" autocomplete="off" />
+              </div>
               <header class="calendar-header">
                 <button
                   type="button"
