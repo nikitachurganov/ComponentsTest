@@ -1098,9 +1098,56 @@
     }
   });
 
-  el.input.addEventListener("focus", function () {
-    setOpen(true);
+  function openCalendarFromField() {
+    if (!isOpen()) setOpen(true);
+  }
+
+  el.input.addEventListener("focus", openCalendarFromField);
+  el.input.addEventListener("pointerdown", openCalendarFromField);
+  el.input.addEventListener("click", function () {
+    if (isMobileSheetMode()) {
+      el.input.blur();
+    }
+    openCalendarFromField();
   });
+  el.input.addEventListener("touchstart", openCalendarFromField, { passive: true });
+
+  const inputWrap = el.root.querySelector("[data-datepicker-input-wrap]");
+  if (inputWrap) {
+    inputWrap.addEventListener("pointerdown", function () {
+      if (document.activeElement !== el.input) {
+        el.input.focus();
+      }
+      openCalendarFromField();
+    });
+  }
+
+  if (el.sheetInput) {
+    el.sheetInput.addEventListener("beforeinput", function (e) {
+      const ie = /** @type {InputEvent} */ (e);
+      if (ie.inputType && String(ie.inputType).indexOf("delete") === 0) return;
+      const data = ie.data;
+      if (data && /[^0-9.]/.test(data)) e.preventDefault();
+    });
+
+    el.sheetInput.addEventListener("input", function () {
+      el.input.value = el.sheetInput.value;
+      syncFromDateInput();
+      syncSheetInputFromMain();
+    });
+
+    el.sheetInput.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        validateAndNormalize();
+        syncSheetInputFromMain();
+      }
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setOpen(false);
+      }
+    });
+  }
 
   el.input.addEventListener("pointerdown", function () {
     if (!isOpen()) setOpen(true);
