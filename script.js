@@ -1359,6 +1359,7 @@
   function makeGrid(host,base){
     host.innerHTML='';
     const head=document.createElement('div');head.className='range-cal-header';head.textContent=`${monthNames[base.getMonth()]} ${base.getFullYear()}`;host.appendChild(head);
+    const wd=document.createElement('div');wd.className='range-weekdays';wd.innerHTML='<span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span class="weekday--weekend">Сб</span><span class="weekday--weekend">Вс</span>';host.appendChild(wd);
     const wd=document.createElement('div');wd.className='range-weekdays';wd.innerHTML='<span>пн</span><span>вт</span><span>ср</span><span>чт</span><span>пт</span><span style="color:#fc8507">сб</span><span style="color:#fc8507">вс</span>';host.appendChild(wd);
     const grid=document.createElement('div');grid.className='range-grid';
     const first=(new Date(base.getFullYear(),base.getMonth(),1).getDay()+6)%7;
