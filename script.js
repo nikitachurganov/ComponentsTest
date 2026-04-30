@@ -660,6 +660,9 @@
           renderCalendar();
         });
         syncSheetInputFromMain();
+        if (isMobileSheetMode() && el.sheetInput) {
+          el.sheetInput.focus();
+        }
         return;
       }
 
@@ -680,6 +683,9 @@
       window.requestAnimationFrame(function () {
         window.requestAnimationFrame(function () {
           el.popup.classList.add("calendar-popup--open");
+          if (isMobileSheetMode() && el.sheetInput) {
+            el.sheetInput.focus();
+          }
         });
       });
       return;
