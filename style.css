@@ -855,6 +855,16 @@ input {
   padding: var(--space-3) var(--space-2);
 }
 
+
+.date-range-picker .date-range-row:focus-within {
+  border-color: var(--color-border-focus);
+  box-shadow: var(--shadow-sm);
+}
+
+.date-range-picker .date-range-row:hover:not(:focus-within) {
+  border-color: var(--color-border-strong);
+}
+
 .date-range-separator {
   color: var(--color-text-secondary);
 }

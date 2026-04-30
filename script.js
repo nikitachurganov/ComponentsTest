@@ -1102,6 +1102,10 @@
     setOpen(true);
   });
 
+  el.input.addEventListener("pointerdown", function () {
+    if (!isOpen()) setOpen(true);
+  });
+
   el.input.addEventListener("click", function () {
     if (isMobileSheetMode()) {
       el.input.blur();
@@ -1376,6 +1380,7 @@
   function render(){ makeGrid(left,view); makeGrid(right,new Date(view.getFullYear(),view.getMonth()+1,1)); }
   function open(){ popup.hidden=false; render(); }
   function close(){ popup.hidden=true; }
+  [startInput,endInput].forEach(i=>{ i.addEventListener('focus',open); i.addEventListener('click',open); });
   [startInput,endInput].forEach(i=>i.addEventListener('focus',open));
   prev.addEventListener('click',()=>{view=new Date(view.getFullYear(),view.getMonth()-1,1);render();});
   next.addEventListener('click',()=>{view=new Date(view.getFullYear(),view.getMonth()+1,1);render();});
