@@ -660,6 +660,9 @@
           renderCalendar();
         });
         syncSheetInputFromMain();
+        if (isMobileSheetMode() && el.sheetInput) {
+          el.sheetInput.focus();
+        }
         return;
       }
 
@@ -680,6 +683,9 @@
       window.requestAnimationFrame(function () {
         window.requestAnimationFrame(function () {
           el.popup.classList.add("calendar-popup--open");
+          if (isMobileSheetMode() && el.sheetInput) {
+            el.sheetInput.focus();
+          }
         });
       });
       return;
@@ -1143,6 +1149,44 @@
     });
   }
 
+  el.input.addEventListener("pointerdown", function () {
+    if (!isOpen()) setOpen(true);
+  });
+
+  el.input.addEventListener("click", function () {
+    if (isMobileSheetMode()) {
+      el.input.blur();
+    }
+    if (!isOpen()) setOpen(true);
+  });
+
+  if (el.sheetInput) {
+    el.sheetInput.addEventListener("beforeinput", function (e) {
+      const ie = /** @type {InputEvent} */ (e);
+      if (ie.inputType && String(ie.inputType).indexOf("delete") === 0) return;
+      const data = ie.data;
+      if (data && /[^0-9.]/.test(data)) e.preventDefault();
+    });
+
+    el.sheetInput.addEventListener("input", function () {
+      el.input.value = el.sheetInput.value;
+      syncFromDateInput();
+      syncSheetInputFromMain();
+    });
+
+    el.sheetInput.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        validateAndNormalize();
+        syncSheetInputFromMain();
+      }
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setOpen(false);
+      }
+    });
+  }
+
   el.input.addEventListener("input", function () {
     syncFromDateInput();
   });
@@ -1367,6 +1411,7 @@
     host.innerHTML='';
     const head=document.createElement('div');head.className='range-cal-header';head.textContent=`${monthNames[base.getMonth()]} ${base.getFullYear()}`;host.appendChild(head);
     const wd=document.createElement('div');wd.className='range-weekdays';wd.innerHTML='<span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span class="weekday--weekend">Сб</span><span class="weekday--weekend">Вс</span>';host.appendChild(wd);
+    const wd=document.createElement('div');wd.className='range-weekdays';wd.innerHTML='<span>пн</span><span>вт</span><span>ср</span><span>чт</span><span>пт</span><span style="color:#fc8507">сб</span><span style="color:#fc8507">вс</span>';host.appendChild(wd);
     const grid=document.createElement('div');grid.className='range-grid';
     const first=(new Date(base.getFullYear(),base.getMonth(),1).getDay()+6)%7;
     const days=new Date(base.getFullYear(),base.getMonth()+1,0).getDate();
@@ -1383,6 +1428,7 @@
   function open(){ popup.hidden=false; render(); }
   function close(){ popup.hidden=true; }
   [startInput,endInput].forEach(i=>{ i.addEventListener('focus',open); i.addEventListener('click',open); });
+  [startInput,endInput].forEach(i=>i.addEventListener('focus',open));
   prev.addEventListener('click',()=>{view=new Date(view.getFullYear(),view.getMonth()-1,1);render();});
   next.addEventListener('click',()=>{view=new Date(view.getFullYear(),view.getMonth()+1,1);render();});
   document.addEventListener('pointerdown',e=>{ if(!root.contains(e.target)) close(); });
