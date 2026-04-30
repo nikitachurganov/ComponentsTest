@@ -40,6 +40,8 @@
     toggle: document.getElementById("calendar-toggle"),
     clear: document.getElementById("clear-input"),
     popup: document.getElementById("date-calendar-popup"),
+    overlay: document.getElementById("calendar-sheet-overlay"),
+    sheetInput: document.getElementById("calendar-sheet-input"),
     grid: document.getElementById("calendar-grid"),
     monthButton: document.getElementById("calendar-month-button"),
     yearButton: document.getElementById("calendar-year-button"),
@@ -230,6 +232,7 @@
     el.popup.setAttribute("hidden", "");
     el.input.setAttribute("aria-expanded", "false");
     el.popup.setAttribute("aria-hidden", "true");
+    setOverlayOpen(false);
     if (!el.toggle.hidden) {
       el.toggle.setAttribute("aria-expanded", "false");
       setToggleLabel(false);
@@ -558,6 +561,7 @@
           renderCalendar();
         });
       }
+      syncSheetInputFromMain();
       return;
     }
 
@@ -571,6 +575,7 @@
           renderCalendar();
         });
       }
+      syncSheetInputFromMain();
       return;
     }
 
@@ -590,6 +595,7 @@
       });
     }
     syncEndIcons();
+    syncSheetInputFromMain();
   }
 
   /** Show calendar glyph when empty, × clear button when anything is typed */
@@ -613,6 +619,28 @@
     el.error.hidden = false;
   }
 
+  function syncSheetInputFromMain() {
+    if (!el.sheetInput) return;
+    el.sheetInput.value = el.input.value;
+  }
+
+  function isMobileSheetMode() {
+    return window.matchMedia("(max-width: 768px)").matches;
+  }
+
+  function setOverlayOpen(open) {
+    if (!el.overlay) return;
+    if (open) {
+      el.overlay.removeAttribute("hidden");
+      window.requestAnimationFrame(function () {
+        el.overlay.classList.add("calendar-sheet-overlay--open");
+      });
+      return;
+    }
+    el.overlay.classList.remove("calendar-sheet-overlay--open");
+    el.overlay.setAttribute("hidden", "");
+  }
+
   function setToggleLabel(open) {
     el.toggle.setAttribute("aria-label", open ? "Закрыть календарь" : "Открыть календарь");
   }
@@ -631,10 +659,12 @@
         updateCalendarWithHeightAnimation(function () {
           renderCalendar();
         });
+        syncSheetInputFromMain();
         return;
       }
 
       el.popup.removeAttribute("hidden");
+      if (isMobileSheetMode()) setOverlayOpen(true);
       el.input.setAttribute("aria-expanded", "true");
       el.popup.setAttribute("aria-hidden", "false");
       if (!el.toggle.hidden) {
@@ -645,6 +675,7 @@
       calendarViewMode = "days";
       syncViewToSelectionOrToday();
       renderCalendar();
+      syncSheetInputFromMain();
 
       window.requestAnimationFrame(function () {
         window.requestAnimationFrame(function () {
@@ -1007,9 +1038,53 @@
     renderYearsView();
   }
 
+  let swipeStartY = 0;
+  let swipeCurrentY = 0;
+  let swipeTracking = false;
+
+  el.popup.addEventListener("touchstart", function (e) {
+    if (!isMobileSheetMode() || !isOpen()) return;
+    const t = e.touches && e.touches[0];
+    if (!t) return;
+    swipeTracking = true;
+    swipeStartY = t.clientY;
+    swipeCurrentY = 0;
+  }, { passive: true });
+
+  el.popup.addEventListener("touchmove", function (e) {
+    if (!swipeTracking || !isMobileSheetMode()) return;
+    const t = e.touches && e.touches[0];
+    if (!t) return;
+    const dy = Math.max(0, t.clientY - swipeStartY);
+    swipeCurrentY = dy;
+    if (dy > 0) {
+      el.popup.style.transform = "translateY(" + dy + "px)";
+      if (el.overlay) {
+        el.overlay.style.opacity = String(Math.max(0, 1 - dy / 320));
+      }
+    }
+  }, { passive: true });
+
+  el.popup.addEventListener("touchend", function () {
+    if (!swipeTracking) return;
+    swipeTracking = false;
+    const shouldClose = swipeCurrentY > 96;
+    el.popup.style.transform = "";
+    if (el.overlay) el.overlay.style.opacity = "";
+    if (shouldClose) {
+      setOpen(false);
+    }
+  });
+
   el.popup.addEventListener("mousedown", function (e) {
     e.preventDefault();
   });
+
+  if (el.overlay) {
+    el.overlay.addEventListener("click", function () {
+      setOpen(false);
+    });
+  }
 
   document.addEventListener("pointerdown", function (e) {
     if (!el.root.contains(e.target)) {
@@ -1020,6 +1095,40 @@
   el.input.addEventListener("focus", function () {
     setOpen(true);
   });
+
+  el.input.addEventListener("click", function () {
+    if (isMobileSheetMode()) {
+      el.input.blur();
+    }
+    if (!isOpen()) setOpen(true);
+  });
+
+  if (el.sheetInput) {
+    el.sheetInput.addEventListener("beforeinput", function (e) {
+      const ie = /** @type {InputEvent} */ (e);
+      if (ie.inputType && String(ie.inputType).indexOf("delete") === 0) return;
+      const data = ie.data;
+      if (data && /[^0-9.]/.test(data)) e.preventDefault();
+    });
+
+    el.sheetInput.addEventListener("input", function () {
+      el.input.value = el.sheetInput.value;
+      syncFromDateInput();
+      syncSheetInputFromMain();
+    });
+
+    el.sheetInput.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        validateAndNormalize();
+        syncSheetInputFromMain();
+      }
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setOpen(false);
+      }
+    });
+  }
 
   el.input.addEventListener("input", function () {
     syncFromDateInput();
@@ -1183,4 +1292,43 @@
   setToggleLabel(false);
   restoreDefaultPlaceholder();
   syncEndIcons();
+})();
+
+
+(function initRangePicker() {
+  const startInput = document.getElementById("range-start-input");
+  const endInput = document.getElementById("range-end-input");
+  const errorEl = document.getElementById("range-error");
+  if (!startInput || !endInput || !errorEl) return;
+
+  function normalize(raw) {
+    const digits = raw.replace(/\D/g, "").slice(0, 8);
+    if (digits.length <= 2) return digits;
+    if (digits.length <= 4) return digits.slice(0, 2) + "." + digits.slice(2);
+    return digits.slice(0, 2) + "." + digits.slice(2, 4) + "." + digits.slice(4);
+  }
+
+  function toDate(v) {
+    const m = v.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+    if (!m) return null;
+    const d = new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1]));
+    if (d.getFullYear() !== Number(m[3]) || d.getMonth() !== Number(m[2]) - 1 || d.getDate() !== Number(m[1])) return null;
+    return d;
+  }
+
+  function validateRange() {
+    errorEl.hidden = true;
+    const s = toDate(startInput.value.trim());
+    const e = toDate(endInput.value.trim());
+    if (!s || !e) return;
+    if (s.getTime() > e.getTime()) errorEl.hidden = false;
+  }
+
+  [startInput, endInput].forEach(function (input) {
+    input.addEventListener("input", function () {
+      input.value = normalize(input.value);
+      validateRange();
+    });
+    input.addEventListener("blur", validateRange);
+  });
 })();

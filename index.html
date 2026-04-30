@@ -70,6 +70,8 @@
               </div>
             </div>
 
+            <div id="calendar-sheet-overlay" class="calendar-sheet-overlay" hidden aria-hidden="true"></div>
+
             <div
               id="date-calendar-popup"
               class="calendar-popup"
@@ -77,7 +79,11 @@
               role="dialog"
               aria-modal="false"
               aria-label="Календарь"
-            >
+>
+              <div class="calendar-sheet-grabber" aria-hidden="true"></div>
+              <div class="calendar-sheet-input-wrap">
+                <input type="text" id="calendar-sheet-input" class="calendar-sheet-input" inputmode="text" placeholder="ДД.ММ.ГГГГ" autocomplete="off" />
+              </div>
               <header class="calendar-header">
                 <button
                   type="button"
@@ -166,6 +172,20 @@
           <p id="date-error" class="error-text" role="alert" hidden>Дата введена неверно</p>
         </div>
       </section>
+    
+
+      <section class="date-picker-section date-picker-section--range" aria-label="Выбор периода">
+        <h1 class="page-title">Период</h1>
+        <div id="date-range-picker" class="date-picker date-range-picker">
+          <div class="date-range-row">
+            <input type="text" id="range-start-input" class="date-input" placeholder="Начало: ДД.ММ.ГГГГ" autocomplete="off" inputmode="text" />
+            <span class="date-range-separator">—</span>
+            <input type="text" id="range-end-input" class="date-input" placeholder="Конец: ДД.ММ.ГГГГ" autocomplete="off" inputmode="text" />
+          </div>
+          <p id="range-error" class="error-text" role="alert" hidden>Проверьте период дат</p>
+        </div>
+      </section>
+
     </main>
 
     <script src="script.js"></script>
