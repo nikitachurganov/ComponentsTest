@@ -1299,3 +1299,42 @@
   restoreDefaultPlaceholder();
   syncEndIcons();
 })();
+
+
+(function initRangePicker() {
+  const startInput = document.getElementById("range-start-input");
+  const endInput = document.getElementById("range-end-input");
+  const errorEl = document.getElementById("range-error");
+  if (!startInput || !endInput || !errorEl) return;
+
+  function normalize(raw) {
+    const digits = raw.replace(/\D/g, "").slice(0, 8);
+    if (digits.length <= 2) return digits;
+    if (digits.length <= 4) return digits.slice(0, 2) + "." + digits.slice(2);
+    return digits.slice(0, 2) + "." + digits.slice(2, 4) + "." + digits.slice(4);
+  }
+
+  function toDate(v) {
+    const m = v.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+    if (!m) return null;
+    const d = new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1]));
+    if (d.getFullYear() !== Number(m[3]) || d.getMonth() !== Number(m[2]) - 1 || d.getDate() !== Number(m[1])) return null;
+    return d;
+  }
+
+  function validateRange() {
+    errorEl.hidden = true;
+    const s = toDate(startInput.value.trim());
+    const e = toDate(endInput.value.trim());
+    if (!s || !e) return;
+    if (s.getTime() > e.getTime()) errorEl.hidden = false;
+  }
+
+  [startInput, endInput].forEach(function (input) {
+    input.addEventListener("input", function () {
+      input.value = normalize(input.value);
+      validateRange();
+    });
+    input.addEventListener("blur", validateRange);
+  });
+})();
