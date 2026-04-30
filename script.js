@@ -1338,3 +1338,45 @@
     input.addEventListener("blur", validateRange);
   });
 })();
+
+(function initRangeCalendar(){
+  const root=document.getElementById('date-range-picker');
+  const startInput=document.getElementById('range-start-input');
+  const endInput=document.getElementById('range-end-input');
+  const popup=document.getElementById('range-calendar-popup');
+  const left=document.getElementById('range-cal-left');
+  const right=document.getElementById('range-cal-right');
+  const prev=document.getElementById('range-prev');
+  const next=document.getElementById('range-next');
+  if(!root||!startInput||!endInput||!popup||!left||!right) return;
+  const monthNames=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+  let view=new Date(new Date().getFullYear(),new Date().getMonth(),1);
+  let start=null,end=null;
+  function fmt(d){const dd=String(d.getDate()).padStart(2,'0');const mm=String(d.getMonth()+1).padStart(2,'0');return `${dd}.${mm}.${d.getFullYear()}`}
+  function parse(v){const m=v.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);if(!m) return null; const d=new Date(+m[3],+m[2]-1,+m[1]); return d && d.getMonth()==+m[2]-1?d:null;}
+  function isSame(a,b){return a&&b&&a.toDateString()===b.toDateString()}
+  function between(d,a,b){return a&&b&&d>a&&d<b}
+  function makeGrid(host,base){
+    host.innerHTML='';
+    const head=document.createElement('div');head.className='range-cal-header';head.textContent=`${monthNames[base.getMonth()]} ${base.getFullYear()}`;host.appendChild(head);
+    const wd=document.createElement('div');wd.className='range-weekdays';wd.innerHTML='<span>пн</span><span>вт</span><span>ср</span><span>чт</span><span>пт</span><span style="color:#fc8507">сб</span><span style="color:#fc8507">вс</span>';host.appendChild(wd);
+    const grid=document.createElement('div');grid.className='range-grid';
+    const first=(new Date(base.getFullYear(),base.getMonth(),1).getDay()+6)%7;
+    const days=new Date(base.getFullYear(),base.getMonth()+1,0).getDate();
+    for(let i=0;i<first;i++){const e=document.createElement('span');grid.appendChild(e)}
+    for(let d=1;d<=days;d++){const cur=new Date(base.getFullYear(),base.getMonth(),d);const b=document.createElement('button');b.type='button';b.className='range-day';b.textContent=String(d);
+      const dow=(cur.getDay()+6)%7;if(dow>=5)b.classList.add('is-weekend');
+      if(isSame(cur,start))b.classList.add('is-start'); if(isSame(cur,end))b.classList.add('is-end'); if(between(cur,start,end))b.classList.add('is-between');
+      b.addEventListener('click',()=>{ if(!start||end){start=cur;end=null;} else if(cur<start){end=start;start=cur;} else {end=cur;} startInput.value= start?fmt(start):''; endInput.value=end?fmt(end):''; render();});
+      grid.appendChild(b)
+    }
+    host.appendChild(grid);
+  }
+  function render(){ makeGrid(left,view); makeGrid(right,new Date(view.getFullYear(),view.getMonth()+1,1)); }
+  function open(){ popup.hidden=false; render(); }
+  function close(){ popup.hidden=true; }
+  [startInput,endInput].forEach(i=>i.addEventListener('focus',open));
+  prev.addEventListener('click',()=>{view=new Date(view.getFullYear(),view.getMonth()-1,1);render();});
+  next.addEventListener('click',()=>{view=new Date(view.getFullYear(),view.getMonth()+1,1);render();});
+  document.addEventListener('pointerdown',e=>{ if(!root.contains(e.target)) close(); });
+})();

@@ -182,6 +182,15 @@
             <span class="date-range-separator">—</span>
             <input type="text" id="range-end-input" class="date-input" placeholder="Конец: ДД.ММ.ГГГГ" autocomplete="off" inputmode="text" />
           </div>
+          
+          <div id="range-calendar-popup" class="range-calendar-popup" hidden>
+            <div class="range-calendars">
+              <div class="range-cal" id="range-cal-left"></div>
+              <div class="range-cal" id="range-cal-right"></div>
+            </div>
+            <button type="button" id="range-prev" class="range-nav range-nav--prev" aria-label="Предыдущий месяц">‹</button>
+            <button type="button" id="range-next" class="range-nav range-nav--next" aria-label="Следующий месяц">›</button>
+          </div>
           <p id="range-error" class="error-text" role="alert" hidden>Проверьте период дат</p>
         </div>
       </section>
